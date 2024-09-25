@@ -32,7 +32,30 @@ func createNewMovieModel(
 	crewList *[]super_model.CrewMember,
 	reviewList *[]super_model.Review,
 ) super_model.IShow{
-	return &model.MovieModel{}
+	return &model.MovieModel{
+		BaseShowe: super_model.BaseShowe{
+			imagesOfShowe,
+			imageThumbnail,
+			movieShowName,
+			movieShowRating,
+			movieShowUpvotes,
+			movieShowDuration,
+			"Movie",
+			movieShowGenre,
+			movieShowStartTime,
+			movieShowEndTime,
+			movieShowWatchAllowedAges,
+			releaseDate,
+			movieShowUx,
+			notes,
+			aboutUsList,
+			termsList,
+			causeToStream,
+			availableInLanguages,
+			crewList,
+			reviewList,
+		},
+	}
 } 
 
 func createEventShowModel(
@@ -62,7 +85,11 @@ func createEventShowModel(
 	crewList *[]super_model.CrewMember,
 	reviewList *[]super_model.Review,
 ) super_model.IShow{
-	return &model.EventModel{}
+	return &model.EventModel{
+		BaseShowe: super_model.BaseShowe{
+
+		},
+	}
 }
 
 func createNewLiveShowModel(
@@ -93,7 +120,11 @@ func createNewLiveShowModel(
 	crewList *[]super_model.CrewMember,
 	reviewList *[]super_model.Review,
 )super_model.IShow{
-	return &model.LiveShowModel{};
+	return &model.LiveShowModel{
+		BaseShowe: super_model.BaseShowe{
+
+		},
+	};
 }
 
 func createNewActivityModel(
@@ -124,5 +155,9 @@ func createNewActivityModel(
 	crewList *[]super_model.CrewMember,
 	reviewList *[]super_model.Review,
 )super_model.IShow{
-	return &model.ActivityModel{};
+	return &model.ActivityModel{
+		BaseShowe: super_model.BaseShowe{
+
+		},
+	};
 }
