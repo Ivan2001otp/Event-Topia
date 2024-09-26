@@ -1,77 +1,62 @@
-package super_model;
+package model
 
-type IShow interface{
+import "go.mongodb.org/mongo-driver/bson/primitive"
 
-	setListOfShoweImage(list []string)
-	setShoweImageThumbnail(url string)
-	setShoweName(showename string)
-	setRating(rating int32)
-	setVotes(votes int64)
-	setDuration(duration int32)
+// "Backend/factory"
 
-	setShoweType(showeType string)
-	setShoweGenre(genre []string)
-	setShoweStartTime( startTime string)
-	setShoweEndTime(endTime string)
+type Review struct{
+	ReviewImg *string `json:"review_img"`;
+	Message string	`json:"message"`;
+}
 
-	setShoweAllowedAges(ages string)//string
-	setShoweReleasedDate(date string)
-	setShoweUX(ux string);
-
-	setShoweNote(notes string);
-	setShoweTermsConditions(t_c []string)
-	setShoweAbtUs(aboutUs []string);
-	setShoweReviews(reviewList []Review)
-
-	setShoweCrewMembers(memberList []CrewMember);
-	setShoweCause(cause string);
-	setShoweLanguages(languages []string);
+type CrewMember struct{
+	CrewImageUrl string `json:"image_url"`;
+	AboutCrew string	`json:"about_crew"`;
 }
 
 
 type BaseShowe struct{
-	imagesOfShowe []string;
-	imageThumbnail string;
-	showeName string;
-	showeRating *int32
 
-	showeVotes *int64;
-	showeDuration *int32;
-	showeType string
-	showeGenre []string
+	ID primitive.ObjectID 	`bson:"_id"`
+	ImagesOfShowe []string  `json:"images_of_showe"`;
+	ImageThumbnail string	`json:"image_of_thumbnail`;
+	ShoweName string		`json:"showe_name"`;	
+	ShoweRating *int64		`json:"showe_rating"`;
 
-	showeFromTime *string
-	showeEndTime *string
-	showeAllowedAges string
+	VendorName *string		`json:"vendor_name"`;
 
-	showeReleaseDate string
-	showUserExperience *string
+	ShoweVotes *int64		`json:"showe_votes`;
+	ShoweDuration *int64	`json:"showe_duration"`;
+	ShoweType string		`json:"showe_type"`
+	ShoweGenre []string		`json:"showe_genre"`
 
-	showeNote *string
-	showeAboutUs *[]string
-	showeTermsConditions *[]string
+	ShoweFromTime *string	`json:"showe_from_time`
+	ShoweEndTime *string	`json:"showe_end_time"`
+	ShoweAllowedAges string	`json:"showe_allowed_ages"`
 
-	showeCause *string
-	showeLanguages *[]string
-	showeLvl1Crew *[]CrewMember
-	// showeLvl2Crew *[]CrewMember;
-	showeReviews *[]Review;
-	
+	ShoweReleaseDate string	`json:"showe_release_date"`
+	ShowUserExperience *string	`json:"show_user_experience"`
+
+	ShoweNote *string	`json:"showe_note"`
+	ShoweAboutUs *[]string	`json:"showe_about_us"`
+	ShoweTermsConditions *[]string	`json:"showe_terms_conditions`
+
+	ShoweCause *string `json:"showe_cause"`;
+	ShoweLanguages *[]string `json:"showe_languages`;
+	ShoweLvl1Crew *[]CrewMember `json:"crew_members"`;
+	ShoweReviews *[]Review `json:"showe_reviews`;	
+
+
 }
 
-//models of lvl1crew,lvl2crew
-type Review struct{
-	reviewImg *string;
-	message string;
+/*
+//getters and setters
+func(mv *BaseShowe)setVendorName(vendorName string){
+	mv.vendorName = &vendorName;
 }
-
-type CrewMember struct{
-	imageUrl string;
-	aboutCrew string;
+func (mv *BaseShowe)getVendorName() string{
+	return *mv.vendorName;
 }
-
-
-//setters and getters.
 func (mv *BaseShowe) setListOfShoweImage(imageList []string){
 	mv.imagesOfShowe = imageList;
 }
@@ -84,13 +69,13 @@ func (mv *BaseShowe) setShoweImageThumbnail(imageThumnail string){
 func (mv *BaseShowe) setShoweName(showName string){
 	mv.showeName = showName;
 }
-func (mv *BaseShowe)setRating(rating int32){
+func (mv *BaseShowe)setRating(rating int64){
 	mv.showeRating = &rating;
 }
 func (mv *BaseShowe)setVotes(votes int64){
 	mv.showeVotes = &votes;
 }
-func(mv *BaseShowe)setDuration(duration int32){
+func(mv *BaseShowe)setDuration(duration int64){
 	mv.showeDuration = &duration;
 }
 func (mv *BaseShowe)setShoweGenre(genreList []string){
@@ -131,4 +116,4 @@ func (mv *BaseShowe)setShoweLanguages(langList []string){
 }
 func (mv *BaseShowe)setShoweCause(cause string){
 	mv.showeCause = &cause;
-}
+}*/
