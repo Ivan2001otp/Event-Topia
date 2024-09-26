@@ -38,12 +38,16 @@ func SetShowDurationDynamically(eventType string) string{
 	switch(eventType){
 	case string(Movie):
 		return string(Movie);
+
 	case string(Event):
 		return string(Event);
+
 	case string(LiveShow):
 		return string(LiveShow)
+
 	case string(Activity):
 		return string(Activity)
+
 	default:
 		return "";
 	}
