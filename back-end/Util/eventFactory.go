@@ -33,7 +33,7 @@ func GetCollectionNameByShoweType(showeType string) string{
 }
 
 //utils
-func setShowDurationDynamically(eventType string) string{
+func SetShowDurationDynamically(eventType string) string{
 
 	switch(eventType){
 	case string(Movie):

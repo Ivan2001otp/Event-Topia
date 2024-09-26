@@ -71,7 +71,7 @@ func CreateShowModel(wg *sync.WaitGroup) http.HandlerFunc {
 		showeDuration := r.FormValue("showeDuration");
 		showeDurationInt,_ := strconv.ParseInt(showeDuration,10,64);
 
-		showeType := setShowDurationDynamically(r.FormValue("showType"))
+		showeType := factory.SetShowDurationDynamically(r.FormValue("showType"))
 		//showe type cannot be empty
 
 		showeGenre := strings.Split(r.FormValue("showeGenre"),",");
