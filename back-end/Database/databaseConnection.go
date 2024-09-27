@@ -16,19 +16,29 @@ import (
 
 var envFile map[string]string = *ReadEnvFile();
 
+
+//database operations
+var client *mongo.Client;
+
+var gridBucket *gridfs.Bucket;
 //image handling ops
 
 //upload to gridfs
 func UploadToGridFS(file io.Reader,fileName string)(string,error){
-	bucket,err := gridfs.NewBucket(client.Database(envFile["DATABASE_NAME"]))
-
+	bucket,err := BucketProvider();
+	
 	if err!=nil{
+		log.Println("BucketProvider failed")
+		log.Fatal(err)
 		return "",err;
 	}
 
 	fileID,err := bucket.UploadFromStream(fileName,file);
 
 	if err!=nil{
+		log.Println("could not upload UploadFromStream()")
+		log.Fatal(err)
+
 		return "",err;
 	}
 
@@ -36,8 +46,6 @@ func UploadToGridFS(file io.Reader,fileName string)(string,error){
 }
 
 
-//database operations
-var client *mongo.Client;
 
 func ReadEnvFile()(*map[string]string){
 	envFile,err:= godotenv.Read(".env")
@@ -121,6 +129,32 @@ func Close() error{
 	return nil;
 }
 
+var lockForBucket =  &sync.Mutex{};
+func BucketProvider() (*gridfs.Bucket, error){
+	if gridBucket==nil{
+		lockForBucket.Lock();
+
+		defer lockVariable.Unlock();
+
+		if gridBucket==nil{
+			gridBucket,err := gridfs.NewBucket(client.Database(envFile["DATABASE_NAME"]),);
+
+			if err!=nil{
+				log.Fatal("Something wrong with grid Fs in mongodb");
+				return nil,err;
+			}
+		log.Println("Singleton instance of mongo provided")
+
+
+			return gridBucket,nil;
+
+		}
+	}else{
+		log.Println("Singleton instance of mongo provided")
+	}
+
+	return gridBucket,nil;
+}
 
 //singleton instance implementation for database
 var lockVariable = &sync.Mutex{}
