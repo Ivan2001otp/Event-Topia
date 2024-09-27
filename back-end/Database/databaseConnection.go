@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -36,7 +37,7 @@ func UploadToGridFS(file io.Reader,fileName string)(string,error){
 
 
 //database operations
-var client *mongo.Client = Connect();
+var client *mongo.Client;
 
 func ReadEnvFile()(*map[string]string){
 	envFile,err:= godotenv.Read(".env")
@@ -44,7 +45,7 @@ func ReadEnvFile()(*map[string]string){
 	if err!=nil{
 		log.Fatal("Error loading .env file");
 	}else{
-		log.Println(envFile)
+		//log.Println(envFile)
 	}
 
 	return &envFile;
@@ -118,4 +119,28 @@ func Close() error{
 	client = nil;
 
 	return nil;
+}
+
+
+//singleton instance implementation for database
+var lockVariable = &sync.Mutex{}
+func MongoDbProvider() (*mongo.Client,error){
+	if client==nil{
+		lockVariable.Lock()
+
+		defer lockVariable.Unlock()
+
+		if client==nil{
+			err:= Connect();
+			if err!=nil{
+				return nil,fmt.Errorf("Something went wrong while connecting to DB!");
+			}
+		}else{
+		log.Println("Singleton already provided.");
+		}
+	}else{
+		log.Println("Singleton already provided.");
+	}
+
+	return client,nil;
 }
