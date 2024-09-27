@@ -1,8 +1,10 @@
 package showe
 
-import ()
+import ("go.mongodb.org/mongo-driver/bson/primitive")
 
 type Liveshow struct{
+	ID primitive.ObjectID `bson:"_id"`
+	Liveshow_id string `json:"liveshow_id"`
 	BaseshowModel
 }
 

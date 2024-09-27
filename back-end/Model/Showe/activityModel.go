@@ -1,9 +1,10 @@
 package showe
 
-import (
-)
+import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type ActivityShow struct {
+	ID primitive.ObjectID `bson:"_id"`
+	Activity_id string `json:"activity_id"`
 	BaseshowModel
 }
 

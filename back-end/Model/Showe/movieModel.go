@@ -1,9 +1,13 @@
 package showe
 
-import ()
+import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type Movie struct{
 	BaseshowModel
+	ID primitive.ObjectID `bson:"_id"`
+	Movie_id string `json:"movie_id"`
+	
+
 	MovieRating int64 `json:"movie_rating"`
 	MovieVotes int64	`json:"movie_votes"`
 	MovieExperience string	`json:"movie_experience"`

@@ -2,21 +2,21 @@ package controller
 
 import (
 	"Backend/Database"
-	"Backend/Model"
 	"Backend/Model/Showe"
 	"Backend/Util"
-	"context"
 	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type status map[string]interface{}
 
-func CreateShowController() http.HandlerFunc{
-	return func(w http.ResponseWriter, r *http.Request) {
+func CreateShowController(w http.ResponseWriter, r *http.Request) {
+	// return func(w http.ResponseWriter, r *http.Request) {
 		
 		if(r.Method != http.MethodPost){
 			w.WriteHeader(http.StatusBadRequest)
@@ -24,14 +24,12 @@ func CreateShowController() http.HandlerFunc{
 			return;
 		}
 
-		var ctx,cancel = context.WithTimeout(context.Background(),100*time.Second);
 
 		
 		//take values from form
 	   err :=	r.ParseMultipartForm(20<<30)
 
 	   if err!=nil{
-		defer cancel();
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(status{"error":"unable to parse form"})
 		return;
@@ -50,7 +48,6 @@ func CreateShowController() http.HandlerFunc{
 			downloadUrl,err :=  database.UploadToGridFS(uploadedFile,v.Filename)
 
 			if err!=nil{
-				defer cancel();
 				log.Println(err.Error());
 				return;
 			}
@@ -65,7 +62,6 @@ func CreateShowController() http.HandlerFunc{
 			uploadedFile,_ := v.Open();
 			downloadUrl,err := database.UploadToGridFS(uploadedFile,v.Filename)
 			if err!=nil{
-				defer cancel();
 				log.Println(err.Error());
 				return;
 			}
@@ -76,9 +72,19 @@ func CreateShowController() http.HandlerFunc{
 		}
 
 		log.Println("thumbnail image is ",thumbnailImg)
+		//make sure u have list of map in r.formvalue(crewmembers)
 
 		var parsedBuff showe.Movie;
+
+		err = json.NewDecoder(r.Body).Decode(&parsedBuff);
+		if err!=nil{
+			http.Error(w,err.Error(),http.StatusBadRequest);
+			return;
+		}
+
 		
+		movie.ID = primitive.NewObjectID();
+		movie.Movie_id = movie.ID.Hex();
 
 		movie.ShowName = r.FormValue(Util.SHOW_NAME)
 
@@ -93,14 +99,7 @@ func CreateShowController() http.HandlerFunc{
 
 		movie.ShowAboutUs = strings.Split(r.FormValue(Util.SHOW_ABOUT_US),",");
 
-		//make sure u have list of map in r.formvalue(crewmembers)
-
-		err = json.NewDecoder(r.Body).Decode(&parsedBuff);
-		if err!=nil{
-			defer cancel();
-			http.Error(w,err.Error(),http.StatusBadRequest);
-			return;
-		}
+		
 
 		movie.ShowCrewMembers = parsedBuff.ShowCrewMembers;
 
@@ -115,12 +114,11 @@ func CreateShowController() http.HandlerFunc{
 		movie.SetThumbnailImg(thumbnailImg)
 		movie.SetBannerImages(bannerImgList)
 
-
 		//parse it to golang struct
 		//store in db
-		defer cancel();
 
-		result,err := SaveNewShowe(Util.NEW_SHOWE_COLLECTION,movie)
+		result,err := database.SaveNewShoweData(Util.NEW_SHOWE_COLLECTION,movie)
+		log.Println(result);
 
 		if err!=nil{
 			log.Println("Something went wrong after saving new created showe!");
@@ -129,9 +127,9 @@ func CreateShowController() http.HandlerFunc{
 		}
 		w.WriteHeader(http.StatusOK);
 
-		json.NewEncoder(w).Encode(status{"message":"success","data":movie})
+		json.NewEncoder(w).Encode(status{"message":"success","id":result,"data":movie})
 
 		return;
 		
-	}
+	// }
 }
