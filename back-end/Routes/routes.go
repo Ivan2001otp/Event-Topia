@@ -2,14 +2,17 @@ package routes
 
 import (
 	// "net/http"
-	"github.com/gorilla/mux"
 	"Backend/Controller"
+	ratelimiter "Backend/RateLimiter"
+
+	"github.com/gorilla/mux"
 )
 
 func AdminRouter() *mux.Router{
 	router := mux.NewRouter()
 
-	router.HandleFunc("create-movie",controller.CreateShowController).Methods("POST");
+	//with rate limiter
+	router.Handle("/create-movie",ratelimiter.RateLimiter(controller.CreateShowController)).Methods("POST");
 
 	return router;
 }
