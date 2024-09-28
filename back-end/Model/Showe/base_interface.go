@@ -1,5 +1,6 @@
 package showe 
 
+import ("time")
 type Crew struct {
 	ImgUrl string;
 	AboutCrewInfo string;
@@ -46,4 +47,6 @@ type BaseshowModel struct{
 	ShowVenue string	`json:"show_venue"`
 	ShowAboutUs []string	`json:"show_about_us"`
 	ShowCrewMembers []Crew	`json:"show_crew_members"`
+	Created_date time.Time `json:"created_at"`
+	Updated_date time.Time `json:"updated_at"`
 }

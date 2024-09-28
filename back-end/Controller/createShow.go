@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-
+	"time"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -114,7 +114,9 @@ func CreateShowController(w http.ResponseWriter, r *http.Request) {
 		movie.SetThumbnailImg(thumbnailImg)
 		movie.SetBannerImages(bannerImgList)
 
-		//parse it to golang struct
+		movie.Updated_date,_	= time.Parse(time.RFC3339,time.Now().Format(time.RFC3339))
+		movie.Created_date,_ = time.Parse(time.RFC3339,time.Now().Format(time.RFC3339))
+
 		//store in db
 
 		result,err := database.SaveNewShoweData(Util.NEW_SHOWE_COLLECTION,movie)
