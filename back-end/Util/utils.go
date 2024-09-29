@@ -37,6 +37,9 @@ const (
 
 const (
 	NEW_MOVIE_COLLECTION = "new-created-movies"
+	NEW_LIVESHOW_COLLECTION = "new-created-liveshow"
+	NEW_EVENT_COLLECTION = "new-created-event"
+	NEW_ACTIVITY_COLLECTION = "new-activity-event"
 )
 
 

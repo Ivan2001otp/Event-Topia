@@ -182,7 +182,148 @@ func MongoDbProvider() (*mongo.Client, error) {
 
 
 // database operations CRUD
-func SaveNewShoweData(collectionName string, movie showe.Movie) (interface{}, error) {
+func SaveNewEventData(collectionName string,event showe.Eventshow)(interface{},error){
+	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+
+	defer cancel()
+
+	collection := GetCollectionByName(collectionName)
+
+	//channels
+	resultChan := make(chan *mongo.InsertOneResult)
+	errChan := make(chan error)
+
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+
+	//goroutine
+	go func() {
+		defer wg.Done()
+
+		result, err := collection.InsertOne(ctx, event)
+
+		if err != nil {
+			log.Println("Could not save user in mongodb ->SaveNewShoweData")
+			errChan <- err
+			return
+		}
+
+		resultChan <- result
+	}()
+
+	//separete goroutine to handle closing channels
+	go func() {
+		wg.Wait()
+		close(resultChan)
+		close(errChan)
+	}()
+
+	select {
+	case result := <-resultChan:
+		return result.InsertedID, nil
+	case err := <-errChan:
+		return nil, err
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
+}
+
+func SaveNewLiveshowData(collectionName string,liveshow showe.Liveshow)(interface{},error){
+	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+
+	defer cancel()
+
+	collection := GetCollectionByName(collectionName)
+
+	//channels
+	resultChan := make(chan *mongo.InsertOneResult)
+	errChan := make(chan error)
+
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+
+	//goroutine
+	go func() {
+		defer wg.Done()
+
+		result, err := collection.InsertOne(ctx, liveshow)
+
+		if err != nil {
+			log.Println("Could not save user in mongodb ->SaveNewShoweData")
+			errChan <- err
+			return
+		}
+
+		resultChan <- result
+	}()
+
+	//separete goroutine to handle closing channels
+	go func() {
+		wg.Wait()
+		close(resultChan)
+		close(errChan)
+	}()
+
+	select {
+	case result := <-resultChan:
+		return result.InsertedID, nil
+	case err := <-errChan:
+		return nil, err
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
+}
+
+func SaveNewActivityData(collectionName string,activity showe.ActivityShow)(interface{},error){
+	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+
+	defer cancel()
+
+	collection := GetCollectionByName(collectionName)
+
+	//channels
+	resultChan := make(chan *mongo.InsertOneResult)
+	errChan := make(chan error)
+
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+
+	//goroutine
+	go func() {
+		defer wg.Done()
+
+		result, err := collection.InsertOne(ctx, activity)
+
+		if err != nil {
+			log.Println("Could not save user in mongodb ->SaveNeweventData")
+			errChan <- err
+			return
+		}
+
+		resultChan <- result
+	}()
+
+	//separete goroutine to handle closing channels
+	go func() {
+		wg.Wait()
+		close(resultChan)
+		close(errChan)
+	}()
+
+	select {
+	case result := <-resultChan:
+		return result.InsertedID, nil
+	case err := <-errChan:
+		return nil, err
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
+}
+
+func SaveNewMovieData(collectionName string, movie showe.Movie) (interface{}, error) {
 	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
 	defer cancel()

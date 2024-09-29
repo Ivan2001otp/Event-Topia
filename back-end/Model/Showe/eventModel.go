@@ -5,6 +5,7 @@ import "go.mongodb.org/mongo-driver/bson/primitive"
 type Eventshow struct {
 	ID       primitive.ObjectID `bson:"_id"`
 	Eventshow_id string             `json:"eventshow_id"`
+	VendorName string 	`json:"vendor_name"`
 	BaseshowModel
 }
 
