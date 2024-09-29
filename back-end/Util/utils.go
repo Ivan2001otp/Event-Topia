@@ -36,7 +36,7 @@ const (
 )
 
 const (
-	NEW_SHOWE_COLLECTION = "new-created-showes"
+	NEW_MOVIE_COLLECTION = "new-created-movies"
 )
 
 

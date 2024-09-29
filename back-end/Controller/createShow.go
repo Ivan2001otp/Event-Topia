@@ -131,7 +131,7 @@ func CreateShowController(w http.ResponseWriter, r *http.Request) {
 
 		//store in db
 
-		result,err := database.SaveNewShoweData(Util.NEW_SHOWE_COLLECTION,movie)
+		result,err := database.SaveNewShoweData(Util.NEW_MOVIE_COLLECTION,movie)
 		log.Println(result);
 
 		if err!=nil{
@@ -142,4 +142,40 @@ func CreateShowController(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK);
 
 		json.NewEncoder(w).Encode(status{"message":"success","id":result})		
+}
+
+
+func FetchAllMoviesShowe(w http.ResponseWriter, r *http.Request){
+
+	if( r.Method != http.MethodGet){
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(status{"error":"supposed to be a GET request"});
+		return;
+	}
+
+
+	recordPerPage,err := strconv.Atoi(r.URL.Query().Get("recordPerPage"));
+
+	if err!=nil || recordPerPage<1{
+		recordPerPage=10;
+	}
+	page,err := strconv.Atoi(r.URL.Query().Get("page"));
+
+	if err!=nil || page<1{
+		page=1;
+	}
+
+	startIndex := (page-1) * recordPerPage;
+
+   allMovieList ,err :=	database.FetchAllMovieShowe(Util.NEW_MOVIE_COLLECTION,startIndex,recordPerPage)
+
+	if err!=nil{
+		w.WriteHeader(http.StatusInternalServerError);
+		json.NewEncoder(w).Encode(status{"error":"could not fetch all movie shows"});
+		return;
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(status{"status":"success","data":allMovieList,});
+	return;
 }

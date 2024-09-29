@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/gridfs"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -224,6 +225,58 @@ func SaveNewShoweData(collectionName string, movie showe.Movie) (interface{}, er
 		return nil, err
 	case <-ctx.Done():
 		return nil, ctx.Err()
-
 	}
+}
+
+
+func FetchAllMovieShowe(collectionName string,startIndex int,recordPerPage int)([] showe.Movie,error){
+	var allMovieList [] showe.Movie;
+
+	collection := GetCollectionByName(collectionName)
+	var ctx,cancel = context.WithTimeout(context.Background(),100*time.Second);
+
+	//defer cancel();	
+
+	matchStage := bson.D{{"$match",bson.D{{}}}}
+
+	groupStage := bson.D{{Key:"$group",
+		Value:bson.D{{Key:"_id",
+			Value: bson.D{{"_id","null"}}},
+		{Key: "total_count",Value: bson.D{{"$sum","1"}}},
+		{Key: "data",Value: bson.D{{"$push","$$ROOT"}}},
+		
+	}}}
+
+	projectStage := bson.D{
+		{
+			"$project",bson.D{
+				{"_id",0},
+				{"total_count","1"},
+				{"movie_showes",bson.D{
+					{"$slice",[]interface{}{"$data",startIndex,recordPerPage}},
+				}},
+			},
+		},
+	}
+
+	result ,err := collection.Aggregate(ctx,mongo.Pipeline{
+		matchStage,groupStage,projectStage,
+	});
+
+	defer cancel();
+
+	if err!=nil{
+		log.Println("Could not fetch movie items");
+		log.Fatal(err);
+		return nil,err;
+	}
+
+	err = result.All(ctx,&allMovieList);
+	if err!=nil{
+		log.Println("Could not parse allmovie list!");
+		log.Fatal(err);
+		return nil,err;
+	}
+
+	return allMovieList,nil;
 }
