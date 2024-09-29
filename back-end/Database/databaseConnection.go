@@ -15,177 +15,178 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var envFile map[string]string = *ReadEnvFile();
+var envFile map[string]string = *ReadEnvFile()
 
+// database operations
+var client *mongo.Client = Connect();
 
-//database operations
-var client *mongo.Client;
+var gridBucket *gridfs.Bucket
 
-var gridBucket *gridfs.Bucket;
 //image handling ops
 
-//upload to gridfs
-func UploadToGridFS(file io.Reader,fileName string)(string,error){
-	bucket,err := BucketProvider();
+// upload to gridfs
+func UploadToGridFS(file io.Reader, fileName string) (string, error) {
+	log.Println("Invoked uploadToGridFs");
 	
-	if err!=nil{
+	bucket, err := BucketProvider()
+	
+	if err != nil {
 		log.Println("BucketProvider failed")
 		log.Fatal(err)
-		return "",err;
+		return "", err
 	}
 
-	fileID,err := bucket.UploadFromStream(fileName,file);
-
-	if err!=nil{
+	fileID, err := bucket.UploadFromStream(fileName, file)
+	log.Println("The file id is ", fileID)
+	if err != nil {
 		log.Println("could not upload UploadFromStream()")
 		log.Fatal(err)
 
-		return "",err;
+		return "", err
 	}
 
-	return fileID.Hex(),nil;
+	return fileID.Hex(), nil
+	// return "https://cdn.pixabay.com/photo/2024/03/04/14/17/ai-generated-8612487_640.jpg",nil;
 }
 
+func ReadEnvFile() *map[string]string {
+	envFile, err := godotenv.Read(".env")
 
-
-func ReadEnvFile()(*map[string]string){
-	envFile,err:= godotenv.Read(".env")
-
-	if err!=nil{
-		log.Fatal("Error loading .env file");
-	}else{
-		//log.Println(envFile)
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	} else {
+		// log.Println(envFile)
 	}
 
-	return &envFile;
+	return &envFile
 }
 
-
-
-func GetCollectionByName(collectionName string) *mongo.Collection{
-	if client==nil{
-		log.Println("GetCollectionByName->client not disconnected");
+func GetCollectionByName(collectionName string) *mongo.Collection {
+	if client == nil {
+		log.Println("GetCollectionByName->client not disconnected")
 		log.Fatal("mongo client not connected")
 	}
 
 	var dbName string = envFile["DATABASE_NAME"]
 
-	if dbName==""{
+	if dbName == "" {
 		log.Fatal("Database name not found")
-		return nil;
+		return nil
 	}
 
-	return client.Database(dbName).Collection(collectionName);
+	return client.Database(dbName).Collection(collectionName)
 }
 
-func Connect() *mongo.Client{
-	connectionUrl := envFile["MONGO_URL"];
-	fmt.Println("Connecting ",connectionUrl)
+func Connect() *mongo.Client {
+	connectionUrl := envFile["MONGO_URL"]
+	fmt.Println("Connecting ", connectionUrl)
 
-	if(connectionUrl==""){
-		log.Fatal("Url not found !")
-		return nil;
-	}
 
-	client,err := mongo.NewClient(options.Client().ApplyURI(connectionUrl));
+	client, err := mongo.NewClient(options.Client().ApplyURI(connectionUrl))
 
-	if err!=nil{
+	if err != nil {
 		log.Panic("Failed to connect database!")
-		log.Fatal(err.Error());
+		log.Fatal(err.Error())
 	}
 
-	ctx,cancel := 	context.WithTimeout(context.Background(),10*time.Second);
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 
-	defer cancel();
-	
+	defer cancel()
 
 	err = client.Connect(ctx)
 
-	if err!=nil{
-		log.Fatal("Error while connecting database ",err.Error());
+	if err != nil {
+		log.Fatal("Error while connecting database ", err.Error())
 
 	}
 
-	log.Println("Mongodb connected successfully !");
-	return client;
+	log.Println("Mongodb connected successfully !")
+	log.Println(client.Database(envFile["DATABASE_NAME"]));
+
+	return client
 }
 
-func Close() error{
-	if client == nil{
-		return nil;
+func Close() error {
+	if client == nil {
+		return nil
 	}
 
-	ctx,cancel := context.WithTimeout(context.Background(),10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 
-	err := client.Disconnect(ctx);
+	err := client.Disconnect(ctx)
 
-	defer cancel();
+	defer cancel()
 
-	if err!=nil{
-		return err;
+	if err != nil {
+		return err
 	}
 
-	client = nil;
+	client = nil
 
-	return nil;
+	return nil
 }
 
-var lockForBucket =  &sync.Mutex{};
-func BucketProvider() (*gridfs.Bucket, error){
-	if gridBucket==nil{
-		lockForBucket.Lock();
+var lockForBucket = &sync.Mutex{}
 
-		defer lockVariable.Unlock();
+func BucketProvider() (*gridfs.Bucket, error) {
+	if gridBucket == nil {
+		lockForBucket.Lock()
 
-		if gridBucket==nil{
-			gridBucket,err := gridfs.NewBucket(client.Database(envFile["DATABASE_NAME"]),);
+		defer lockForBucket.Unlock()
 
-			if err!=nil{
-				log.Fatal("Something wrong with grid Fs in mongodb");
-				return nil,err;
+		if gridBucket == nil {
+			log.Println("Initializing bucket")
+			log.Println(envFile["DATABASE_NAME"]);
+			if(client==nil){
+				log.Println("mongo client is nil");
 			}
-		log.Println("Singleton instance of mongo provided")
+			gridBucket, err := gridfs.NewBucket(client.Database(envFile["DATABASE_NAME"]))
+			
+			if err != nil {
+				log.Fatal("Something wrong with grid Fs in mongodb")
+				return nil, err
+			}
+			log.Println("Singleton instance of mongo provided")
 
-
-			return gridBucket,nil;
+			return gridBucket, nil
 
 		}
-	}else{
+	} else {
 		log.Println("Singleton instance of mongo provided")
 	}
 
-	return gridBucket,nil;
+	return gridBucket, nil
 }
 
-//singleton instance implementation for database
+// singleton instance implementation for database
 var lockVariable = &sync.Mutex{}
-func MongoDbProvider() (*mongo.Client,error){
-	if client==nil{
+
+func MongoDbProvider() (*mongo.Client, error) {
+	if client == nil {
 		lockVariable.Lock()
 
 		defer lockVariable.Unlock()
 
-		if client==nil{
-			err:= Connect();
-			if err!=nil{
-				return nil,fmt.Errorf("Something went wrong while connecting to DB!");
+		if client == nil {
+			err := Connect()
+			if err != nil {
+				return nil, fmt.Errorf("Something went wrong while connecting to DB!")
 			}
-		}else{
-		log.Println("Singleton already provided.");
+		} else {
+			log.Println("Singleton already provided.")
 		}
-	}else{
-		log.Println("Singleton already provided.");
+	} else {
+		log.Println("Singleton already provided.")
 	}
 
-	return client,nil;
+	return client, nil
 }
 
+// database operations CRUD
+func SaveNewShoweData(collectionName string, movie showe.Movie) (interface{}, error) {
+	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
-//database operations CRUD
-func SaveNewShoweData(collectionName string , movie showe.Movie) (interface{},error){
-	var ctx,cancel = context.WithTimeout(context.Background(),50*time.Second);
-
-	defer cancel();
+	defer cancel()
 
 	collection := GetCollectionByName(collectionName)
 
@@ -193,39 +194,39 @@ func SaveNewShoweData(collectionName string , movie showe.Movie) (interface{},er
 	resultChan := make(chan *mongo.InsertOneResult)
 	errChan := make(chan error)
 
-	var wg sync.WaitGroup;
+	var wg sync.WaitGroup
 
 	wg.Add(1)
 
 	//goroutine
-	go func(){
-		defer wg.Done();
+	go func() {
+		defer wg.Done()
 
-		result,err := collection.InsertOne(ctx,movie)
+		result, err := collection.InsertOne(ctx, movie)
 
-		if err!=nil{
-			log.Println("Could not save user in mongodb ->SaveNewShoweData");
-			errChan<-err;
-			return;
+		if err != nil {
+			log.Println("Could not save user in mongodb ->SaveNewShoweData")
+			errChan <- err
+			return
 		}
 
-		resultChan <- result;
+		resultChan <- result
 	}()
 
 	//separete goroutine to handle closing channels
-	go func(){
+	go func() {
 		wg.Wait()
 		close(resultChan)
-		close(errChan);
+		close(errChan)
 	}()
 
-	select{
-	case result:=<-resultChan:
-		return result.InsertedID,nil;
+	select {
+	case result := <-resultChan:
+		return result.InsertedID, nil
 	case err := <-errChan:
-		return nil,err;
-	case <- ctx.Done():
-		return nil,ctx.Err();
+		return nil, err
+	case <-ctx.Done():
+		return nil, ctx.Err()
 
 	}
 }

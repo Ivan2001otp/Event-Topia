@@ -30,6 +30,7 @@ func CreateShowController(w http.ResponseWriter, r *http.Request) {
 	   err :=	r.ParseMultipartForm(20<<30)
 
 	   if err!=nil{
+		log.Println("Parsing a multipart failed");
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(status{"error":"unable to parse form"})
 		return;
@@ -37,11 +38,14 @@ func CreateShowController(w http.ResponseWriter, r *http.Request) {
 
 	//properties
 	var movie showe.Movie
-
+	var parsedCrewList []showe.Crew;
 	var bannerImgList []string;
 	var thumbnailImg string="";
 
 		multipartFormData := r.MultipartForm;
+
+		log.Println("The banner images is ",multipartFormData.File[Util.BANNER_IMAGES])
+		log.Println("The thumbnail images ",multipartFormData.File[Util.THUMBNAIL])
 		
 		for _,v:= range multipartFormData.File[Util.BANNER_IMAGES]{
 			uploadedFile,_ := v.Open();
@@ -53,8 +57,6 @@ func CreateShowController(w http.ResponseWriter, r *http.Request) {
 			}
 
 			bannerImgList = append(bannerImgList,downloadUrl);
-
-
 		}
 
 		//thumnail
@@ -68,20 +70,28 @@ func CreateShowController(w http.ResponseWriter, r *http.Request) {
 
 			// bannerImgList = append(bannerImgList,downloadUrl);
 			thumbnailImg = downloadUrl;
-			break;
+			
 		}
 
-		log.Println("thumbnail image is ",thumbnailImg)
-		//make sure u have list of map in r.formvalue(crewmembers)
+		//use r.Form["key"]
+		log.Println(r.Form)
 
-		var parsedBuff showe.Movie;
+		//crafting the list of crew members.
+		jsonCrew := r.Form["show_crew_members"]
 
-		err = json.NewDecoder(r.Body).Decode(&parsedBuff);
+		//convert json bytes to crew - list struct
+		err = json.Unmarshal([]byte(jsonCrew[0]),&parsedCrewList);
+
 		if err!=nil{
-			http.Error(w,err.Error(),http.StatusBadRequest);
-			return;
+			log.Println("wrong while jsonbytes to slice of crew")
+			log.Fatal(err);
 		}
-
+		
+		for _,e := range parsedCrewList{
+			log.Println("Img ->",e.ImgUrl);
+			log.Println("Info ->",e.AboutCrewInfo)
+		}
+	
 		
 		movie.ID = primitive.NewObjectID();
 		movie.Movie_id = movie.ID.Hex();
@@ -98,18 +108,20 @@ func CreateShowController(w http.ResponseWriter, r *http.Request) {
 		movie.MovieVotes = votes;
 
 		movie.ShowAboutUs = strings.Split(r.FormValue(Util.SHOW_ABOUT_US),",");
-
+		movie.ShowType =(string(Util.Movie))
 		
 
-		movie.ShowCrewMembers = parsedBuff.ShowCrewMembers;
+		movie.ShowCrewMembers = parsedCrewList;
 
 
 		movie.ShowGenre = r.FormValue(Util.SHOW_GENRE)
 		movie.ShowReleaseDate = r.FormValue(Util.SHOW_RELEASE_DATE)
+		movie.VendorName = r.FormValue(Util.VENDOR_NAME)
 		
 		movie.ShowStartTime = r.FormValue(Util.SHOW_START_TIME)
 		movie.ShowEndTime = r.FormValue(Util.SHOW_END_TIME)
 		movie.ShowVenue = r.FormValue(Util.SHOW_VENUE)
+		movie.MovieExperience = r.FormValue(Util.MOVIE_EXPERIENCE)
 
 		movie.SetThumbnailImg(thumbnailImg)
 		movie.SetBannerImages(bannerImgList)
@@ -129,9 +141,5 @@ func CreateShowController(w http.ResponseWriter, r *http.Request) {
 		}
 		w.WriteHeader(http.StatusOK);
 
-		json.NewEncoder(w).Encode(status{"message":"success","id":result,"data":movie})
-
-		return;
-		
-	// }
+		json.NewEncoder(w).Encode(status{"message":"success","id":result})		
 }

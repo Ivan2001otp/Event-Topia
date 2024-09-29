@@ -1,7 +1,7 @@
 package main
 
 import (
-	 "Backend/Routes"
+	"Backend/Routes"
 	// "Backend/Model/Showe/Factory"
 	// "Backend/Util"
 	// "Backend/Model/Showe"
@@ -11,7 +11,9 @@ import (
 
 func main(){
 
+
 	router := routes.AdminRouter()
+	
 
 	log.Println("Starting server on :8080")
 	

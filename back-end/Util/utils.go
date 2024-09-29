@@ -17,20 +17,22 @@ const (
 )
 
 const (
-	SHOW_NAME  string = "show-name"
-	SHOW_DURATION string = "show-duration"
-	SHOW_GENRE  string = "show-genre"
-	SHOW_RELEASE_DATE  string = "show-release-date"
-	SHOW_START_TIME string = "show-start-time"
-	SHOW_END_TIME string = "show-end-time"
-	SHOW_VENUE string = "show-venue"
-	SHOW_ABOUT_US string = "show-about-us"
-	SHOW_CREW_MEMBERS string = "show-crew-members"
-	MOVIE_RATING string = "movie-rating"
-	MOVIE_VOTING string = "movie-voting"
-	MOVIE_EXPERIENCE string = "movie-experience"
-	THUMBNAIL string = "thumb-nail"
-	BANNER_IMAGES string = "banner-attachments"
+	SHOW_NAME  string = "show_name"
+	SHOW_DURATION string = "show_duration"
+	SHOW_GENRE  string = "show_genre"
+	SHOW_RELEASE_DATE  string = "show_release_date"
+	SHOW_START_TIME string = "show_start_time"
+	SHOW_END_TIME string = "show_end_time"
+	SHOW_VENUE string = "show_venue"
+	SHOW_ABOUT_US string = "show_about_us"
+	SHOW_CREW_MEMBERS string = "show_crew_members"
+	MOVIE_RATING string = "movie_rating"
+	MOVIE_VOTING string = "movie_voting"
+	MOVIE_EXPERIENCE string = "movie_experience"
+	THUMBNAIL string = "thumbnail"
+	BANNER_IMAGES string = "banner_attachments"
+	VENDOR_NAME string = "vendor_name"
+	
 )
 
 const (
