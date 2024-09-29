@@ -2,6 +2,7 @@ package database
 
 import (
 	showe "Backend/Model/Showe"
+	util "Backend/Util"
 	"context"
 	"fmt"
 	"io"
@@ -229,8 +230,139 @@ func SaveNewShoweData(collectionName string, movie showe.Movie) (interface{}, er
 }
 
 
-func FetchAllMovieShowe(collectionName string,startIndex int,recordPerPage int)([] showe.Movie,error){
-	var allMovieList [] showe.Movie;
+func FetchShoweByFilter(collectionName string,startIndex int ,recordPerPage int,filter string) (interface{},error){
+	
+	var ctx,cancel = context.WithTimeout(context.Background(),100*time.Second);
+
+	//match stage
+	matchStage := bson.D{{"$match",bson.D{{}}}}
+
+	//group stage
+	groupStage := bson.D{{Key:"$group",Value:bson.D{{Key:"_id",Value:bson.D{{"_id","null"}}},
+		{Key: "total_count",Value: bson.D{{"$sum","1"}}},
+		{Key:"data",Value:bson.D{{"$push","$$ROOT"}}},
+	}}}
+
+	//project stage
+	projectStage := bson.D{
+		{
+			"$project",bson.D{
+				{"_id",0},
+				{"total_count",1},
+				{"data",bson.D{
+					{"$slice",[]interface{}{"$data",startIndex,recordPerPage}}}},
+			},
+		},
+	}
+
+
+	switch(filter){
+
+
+	case string(util.Movie):
+		collectionName := util.GetCollectionNameByShoweType(string(util.Movie))
+		collection := GetCollectionByName(collectionName)
+		result,err := collection.Aggregate(ctx,mongo.Pipeline{
+			matchStage,groupStage,projectStage,
+		})
+
+		defer cancel();
+
+		if err!=nil{
+			log.Fatal(err);
+			return nil,err;
+		}
+
+		var allMovies []bson.M;
+
+		if err=result.All(ctx,&allMovies);err!=nil{
+			log.Fatal(err);
+			return nil,err;
+		}
+
+		return allMovies,nil;
+
+		break;
+
+	case string(util.Event):
+		collectionName := util.GetCollectionNameByShoweType(string(util.Movie))
+		collection := GetCollectionByName(collectionName)
+		result,err := collection.Aggregate(ctx,mongo.Pipeline{
+			matchStage,groupStage,projectStage,
+		})
+
+		defer cancel();
+
+		if err!=nil{
+			log.Fatal(err);
+			return nil,err;
+		}
+
+		var allEvents []bson.M;
+
+		if err=result.All(ctx,&allEvents);err!=nil{
+			log.Fatal(err);
+			return nil,err;
+		}
+
+		return allEvents,nil;
+		break;
+
+	case string(util.Activity):
+		collectionName := util.GetCollectionNameByShoweType(string(util.Movie))
+		collection := GetCollectionByName(collectionName)
+		result,err := collection.Aggregate(ctx,mongo.Pipeline{
+			matchStage,groupStage,projectStage,
+		})
+
+		defer cancel();
+
+		if err!=nil{
+			log.Fatal(err);
+			return nil,err;
+		}
+
+		var allActivities []bson.M;
+
+		if err=result.All(ctx,&allActivities);err!=nil{
+			log.Fatal(err);
+			return nil,err;
+		}
+
+		return allActivities,nil;
+		break;
+
+	case string(util.LiveShow):
+		collectionName := util.GetCollectionNameByShoweType(string(util.Movie))
+		collection := GetCollectionByName(collectionName)
+		result,err := collection.Aggregate(ctx,mongo.Pipeline{
+			matchStage,groupStage,projectStage,
+		})
+
+		defer cancel();
+
+		if err!=nil{
+			log.Fatal(err);
+			return nil,err;
+		}
+
+		var allLiveShows []bson.M;
+
+		if err=result.All(ctx,&allLiveShows);err!=nil{
+			log.Fatal(err);
+			return nil,err;
+		}
+
+		return allLiveShows,nil;
+		break;
+
+	}
+
+	return nil,fmt.Errorf("the movie type does not exist");
+}
+
+func FetchAllMovieShowe(collectionName string,startIndex int,recordPerPage int)(interface{},error){
+	var allMovieList [] bson.M;
 
 	collection := GetCollectionByName(collectionName)
 	var ctx,cancel = context.WithTimeout(context.Background(),100*time.Second);
@@ -251,7 +383,7 @@ func FetchAllMovieShowe(collectionName string,startIndex int,recordPerPage int)(
 		{
 			"$project",bson.D{
 				{"_id",0},
-				{"total_count","1"},
+				{"total_count",1},
 				{"movie_showes",bson.D{
 					{"$slice",[]interface{}{"$data",startIndex,recordPerPage}},
 				}},
