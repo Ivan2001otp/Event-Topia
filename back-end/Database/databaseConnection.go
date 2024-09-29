@@ -16,15 +16,10 @@ import (
 )
 
 var envFile map[string]string = *ReadEnvFile()
-
-// database operations
 var client *mongo.Client = Connect();
-
 var gridBucket *gridfs.Bucket
 
-//image handling ops
-
-// upload to gridfs
+/*Util handlers*/
 func UploadToGridFS(file io.Reader, fileName string) (string, error) {
 	log.Println("Invoked uploadToGridFs");
 	
@@ -60,6 +55,7 @@ func ReadEnvFile() *map[string]string {
 
 	return &envFile
 }
+
 
 func GetCollectionByName(collectionName string) *mongo.Collection {
 	if client == nil {
@@ -181,6 +177,7 @@ func MongoDbProvider() (*mongo.Client, error) {
 
 	return client, nil
 }
+
 
 // database operations CRUD
 func SaveNewShoweData(collectionName string, movie showe.Movie) (interface{}, error) {

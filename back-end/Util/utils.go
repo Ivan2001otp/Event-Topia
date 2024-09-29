@@ -27,7 +27,7 @@ const (
 	SHOW_ABOUT_US string = "show_about_us"
 	SHOW_CREW_MEMBERS string = "show_crew_members"
 	MOVIE_RATING string = "movie_rating"
-	MOVIE_VOTING string = "movie_voting"
+	MOVIE_VOTING string = "movie_votes"
 	MOVIE_EXPERIENCE string = "movie_experience"
 	THUMBNAIL string = "thumbnail"
 	BANNER_IMAGES string = "banner_attachments"

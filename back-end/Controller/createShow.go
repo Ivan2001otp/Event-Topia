@@ -23,8 +23,6 @@ func CreateShowController(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(status{"error":"not a post method"})
 			return;
 		}
-
-
 		
 		//take values from form
 	   err :=	r.ParseMultipartForm(20<<30)
@@ -47,6 +45,7 @@ func CreateShowController(w http.ResponseWriter, r *http.Request) {
 		log.Println("The banner images is ",multipartFormData.File[Util.BANNER_IMAGES])
 		log.Println("The thumbnail images ",multipartFormData.File[Util.THUMBNAIL])
 		
+		//banner images
 		for _,v:= range multipartFormData.File[Util.BANNER_IMAGES]{
 			uploadedFile,_ := v.Open();
 			downloadUrl,err :=  database.UploadToGridFS(uploadedFile,v.Filename)
@@ -104,6 +103,7 @@ func CreateShowController(w http.ResponseWriter, r *http.Request) {
 		rating,_ := strconv.ParseInt(r.FormValue(Util.MOVIE_RATING,),10,64);
 		movie.MovieRating = rating
 
+		log.Println("The voting value is ",r.Form[Util.MOVIE_VOTING])
 		votes,_ := strconv.ParseInt(r.FormValue(Util.MOVIE_VOTING),10,64);
 		movie.MovieVotes = votes;
 
