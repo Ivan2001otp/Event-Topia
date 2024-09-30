@@ -6,11 +6,11 @@ type Movie struct{
 	ID primitive.ObjectID `bson:"_id"`
 	Movie_id string `json:"movie_id"`
 	BaseshowModel
-	ShowReleaseDate string	`json:"show_release_date"`
-	MovieRating int64 `json:"movie_rating"`
-	MovieVotes int64	`json:"movie_votes"`
-	VendorName string `json:"vendor_name"`
-	MovieExperience string	`json:"movie_experience"`
+	Show_release_date string	`json:"show_release_date"`
+	Movie_rating int64 `json:"movie_rating"`
+	Movie_votes int64	`json:"movie_votes"`
+	Vendor_name string `json:"vendor_name"`
+	Movie_experience string	`json:"movie_experience"`
 }
 
 
@@ -24,11 +24,11 @@ func (mv *Movie)SetBannerImages(imglist []string){
 }
 
 func (mv *Movie)SetMovieRating(rating int64){
-	mv.MovieRating = rating;
+	mv.Movie_rating = rating;
 }
 func (mv *Movie)SetMovieVotes(votes int64){
-	mv.MovieVotes = votes;
+	mv.Movie_votes = votes;
 }
 func (mv *Movie)SetMovieExperience( exp string){
-	mv.MovieExperience = exp;
+	mv.Movie_experience = exp;
 }

@@ -12,9 +12,9 @@ func CreateShowVariantByFactory(showType string,baseShowStructParams show.Basesh
 	case string(Util.Movie):
 		return &show.Movie{
 			BaseshowModel: baseShowStructParams,
-			MovieRating: 3,
-			MovieVotes: 100,
-			MovieExperience:"2D,3D" ,
+			Movie_rating: 3,
+			Movie_votes: 100,
+			Movie_experience:"2D,3D" ,
 		}
 
 	case string(Util.Activity):

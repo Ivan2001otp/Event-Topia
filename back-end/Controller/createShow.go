@@ -102,11 +102,11 @@ func CreateMovieController(w http.ResponseWriter, r *http.Request) {
 	movie.ShowDuration = duration
 
 	rating, _ := strconv.ParseInt(r.FormValue(Util.MOVIE_RATING), 10, 64)
-	movie.MovieRating = rating
+	movie.Movie_rating = rating
 
 	log.Println("The voting value is ", r.Form[Util.MOVIE_VOTING])
 	votes, _ := strconv.ParseInt(r.FormValue(Util.MOVIE_VOTING), 10, 64)
-	movie.MovieVotes = votes
+	movie.Movie_votes = votes
 
 	movie.ShowAboutUs = strings.Split(r.FormValue(Util.SHOW_ABOUT_US), ",")
 	movie.ShowType = (string(Util.Movie))
@@ -114,13 +114,13 @@ func CreateMovieController(w http.ResponseWriter, r *http.Request) {
 	movie.ShowCrewMembers = parsedCrewList
 
 	movie.ShowGenre = r.FormValue(Util.SHOW_GENRE)
-	movie.ShowReleaseDate = r.FormValue(Util.SHOW_RELEASE_DATE)
-	movie.VendorName = r.FormValue(Util.VENDOR_NAME)
+	movie.Show_release_date = r.FormValue(Util.SHOW_RELEASE_DATE)
+	movie.Vendor_name = r.FormValue(Util.VENDOR_NAME)
 
 	movie.ShowStartTime = r.FormValue(Util.SHOW_START_TIME)
 	movie.ShowEndTime = r.FormValue(Util.SHOW_END_TIME)
 	movie.ShowVenue = r.FormValue(Util.SHOW_VENUE)
-	movie.MovieExperience = r.FormValue(Util.MOVIE_EXPERIENCE)
+	movie.Movie_experience = r.FormValue(Util.MOVIE_EXPERIENCE)
 
 	movie.SetThumbnailImg(thumbnailImg)
 	movie.SetBannerImages(bannerImgList)
@@ -467,7 +467,7 @@ func CreateActivityController(w http.ResponseWriter, r *http.Request) {
 
 	activity.ShowGenre = r.FormValue(Util.SHOW_GENRE)
 	// activity.ShowReleaseDate = r.FormValue(Util.SHOW_RELEASE_DATE);
-	activity.VendorName = r.FormValue(Util.VENDOR_NAME)
+	activity.Vendor_name = r.FormValue(Util.VENDOR_NAME)
 
 	activity.ShowStartTime = r.FormValue(Util.SHOW_START_TIME)
 	activity.ShowEndTime = r.FormValue(Util.SHOW_END_TIME)
@@ -563,7 +563,7 @@ func CreateEventController(w http.ResponseWriter, r *http.Request) {
 	}
 
 	event.ID = primitive.NewObjectID()
-	event.Eventshow_id = event.ID.Hex()
+	event.Event_show_id = event.ID.Hex()
 
 	event.ShowName = r.FormValue(Util.SHOW_NAME)
 	duration, _ := strconv.ParseInt(r.FormValue(Util.SHOW_DURATION), 10, 64)
@@ -575,7 +575,7 @@ func CreateEventController(w http.ResponseWriter, r *http.Request) {
 
 	event.ShowGenre = r.FormValue(Util.SHOW_GENRE)
 	// event.ShowReleaseDate = r.FormValue(Util.SHOW_RELEASE_DATE);
-	event.VendorName = r.FormValue(Util.VENDOR_NAME)
+	event.Vendor_name = r.FormValue(Util.VENDOR_NAME)
 
 	event.ShowStartTime = r.FormValue(Util.SHOW_START_TIME)
 	event.ShowEndTime = r.FormValue(Util.SHOW_END_TIME)
