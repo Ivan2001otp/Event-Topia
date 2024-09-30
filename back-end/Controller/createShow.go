@@ -213,12 +213,66 @@ func FetchAllActivity(w http.ResponseWriter, r *http.Request) {
 
 // fetch all event
 func FetchAllEvent(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(status{"error": "supposed to GET request"})
+		return
+	}
+	recordPerPage, err := strconv.Atoi(r.URL.Query().Get("recordPerPage"))
 
+	if err != nil || recordPerPage < 1 {
+		recordPerPage = 10
+	}
+
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil || page < 1 {
+		page = 1
+	}
+
+	startIndex := (page - 1) * recordPerPage
+	log.Println("hi")
+	allEvents, err := database.FetchAllActivityShowe(Util.NEW_EVENT_COLLECTION, startIndex, recordPerPage)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(status{"error": "could not fetch all activity shows"})
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(status{"status": "success", "data": allEvents})
+	return
 }
 
 // fetch all liveshow
 func FetchAllLiveshow(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(status{"error": "supposed to GET request"})
+		return
+	}
+	recordPerPage, err := strconv.Atoi(r.URL.Query().Get("recordPerPage"))
 
+	if err != nil || recordPerPage < 1 {
+		recordPerPage = 10
+	}
+
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil || page < 1 {
+		page = 1
+	}
+
+	startIndex := (page - 1) * recordPerPage
+	log.Println("hi")
+	allLivesShowes, err := database.FetchAllActivityShowe(Util.NEW_LIVESHOW_COLLECTION, startIndex, recordPerPage)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(status{"error": "could not fetch all activity shows"})
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(status{"status": "success", "data": allLivesShowes})
+	return
 }
 
 // create liveshow
