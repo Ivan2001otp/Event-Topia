@@ -41,7 +41,7 @@ type BaseshowModel struct{
 	ShowName string	`json:"show_name"`;
 	ShowDuration int64	`json:"show_duration"`;
 	ShowGenre string	`json:"show_genre"`
-	ShowReleaseDate string	`json:"show_release_date"`
+	// ShowReleaseDate string	`json:"show_release_date"`
 	ShowStartTime string	`json:"show_start_time"`
 	ShowEndTime string	`json:"show_end_time"`
 	ShowVenue string	`json:"show_venue"`

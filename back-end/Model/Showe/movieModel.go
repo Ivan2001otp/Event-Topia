@@ -6,6 +6,7 @@ type Movie struct{
 	ID primitive.ObjectID `bson:"_id"`
 	Movie_id string `json:"movie_id"`
 	BaseshowModel
+	ShowReleaseDate string	`json:"show_release_date"`
 	MovieRating int64 `json:"movie_rating"`
 	MovieVotes int64	`json:"movie_votes"`
 	VendorName string `json:"vendor_name"`

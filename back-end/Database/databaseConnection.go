@@ -18,15 +18,15 @@ import (
 )
 
 var envFile map[string]string = *ReadEnvFile()
-var client *mongo.Client = Connect();
+var client *mongo.Client = Connect()
 var gridBucket *gridfs.Bucket
 
 /*Util handlers*/
 func UploadToGridFS(file io.Reader, fileName string) (string, error) {
-	log.Println("Invoked uploadToGridFs");
-	
+	log.Println("Invoked uploadToGridFs")
+
 	bucket, err := BucketProvider()
-	
+
 	if err != nil {
 		log.Println("BucketProvider failed")
 		log.Fatal(err)
@@ -58,7 +58,6 @@ func ReadEnvFile() *map[string]string {
 	return &envFile
 }
 
-
 func GetCollectionByName(collectionName string) *mongo.Collection {
 	if client == nil {
 		log.Println("GetCollectionByName->client not disconnected")
@@ -79,7 +78,6 @@ func Connect() *mongo.Client {
 	connectionUrl := envFile["MONGO_URL"]
 	fmt.Println("Connecting ", connectionUrl)
 
-
 	client, err := mongo.NewClient(options.Client().ApplyURI(connectionUrl))
 
 	if err != nil {
@@ -99,7 +97,7 @@ func Connect() *mongo.Client {
 	}
 
 	log.Println("Mongodb connected successfully !")
-	log.Println(client.Database(envFile["DATABASE_NAME"]));
+	log.Println(client.Database(envFile["DATABASE_NAME"]))
 
 	return client
 }
@@ -134,12 +132,12 @@ func BucketProvider() (*gridfs.Bucket, error) {
 
 		if gridBucket == nil {
 			log.Println("Initializing bucket")
-			log.Println(envFile["DATABASE_NAME"]);
-			if(client==nil){
-				log.Println("mongo client is nil");
+			log.Println(envFile["DATABASE_NAME"])
+			if client == nil {
+				log.Println("mongo client is nil")
 			}
 			gridBucket, err := gridfs.NewBucket(client.Database(envFile["DATABASE_NAME"]))
-			
+
 			if err != nil {
 				log.Fatal("Something wrong with grid Fs in mongodb")
 				return nil, err
@@ -168,7 +166,7 @@ func MongoDbProvider() (*mongo.Client, error) {
 		if client == nil {
 			err := Connect()
 			if err != nil {
-				return nil, fmt.Errorf("Something went wrong while connecting to DB!")
+				return nil, fmt.Errorf("something went wrong while connecting to DB")
 			}
 		} else {
 			log.Println("Singleton already provided.")
@@ -180,9 +178,8 @@ func MongoDbProvider() (*mongo.Client, error) {
 	return client, nil
 }
 
-
 // database operations CRUD
-func SaveNewEventData(collectionName string,event showe.Eventshow)(interface{},error){
+func SaveNewEventData(collectionName string, event showe.Eventshow) (interface{}, error) {
 	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
 	defer cancel()
@@ -229,7 +226,7 @@ func SaveNewEventData(collectionName string,event showe.Eventshow)(interface{},e
 	}
 }
 
-func SaveNewLiveshowData(collectionName string,liveshow showe.Liveshow)(interface{},error){
+func SaveNewLiveshowData(collectionName string, liveshow showe.Liveshow) (interface{}, error) {
 	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
 	defer cancel()
@@ -276,7 +273,7 @@ func SaveNewLiveshowData(collectionName string,liveshow showe.Liveshow)(interfac
 	}
 }
 
-func SaveNewActivityData(collectionName string,activity showe.ActivityShow)(interface{},error){
+func SaveNewActivityData(collectionName string, activity showe.ActivityShow) (interface{}, error) {
 	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
 	defer cancel()
@@ -370,186 +367,322 @@ func SaveNewMovieData(collectionName string, movie showe.Movie) (interface{}, er
 	}
 }
 
+func FetchShoweByFilter(collectionName string, startIndex int, recordPerPage int, filter string) (interface{}, error) {
 
-func FetchShoweByFilter(collectionName string,startIndex int ,recordPerPage int,filter string) (interface{},error){
-	
-	var ctx,cancel = context.WithTimeout(context.Background(),100*time.Second);
+	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
 	//match stage
-	matchStage := bson.D{{"$match",bson.D{{}}}}
+	matchStage := bson.D{{"$match", bson.D{{}}}}
 
 	//group stage
-	groupStage := bson.D{{Key:"$group",Value:bson.D{{Key:"_id",Value:bson.D{{"_id","null"}}},
-		{Key: "total_count",Value: bson.D{{"$sum","1"}}},
-		{Key:"data",Value:bson.D{{"$push","$$ROOT"}}},
+	groupStage := bson.D{{Key: "$group", Value: bson.D{{Key: "_id", Value: bson.D{{"_id", "null"}}},
+		{Key: "total_count", Value: bson.D{{"$sum", "1"}}},
+		{Key: "data", Value: bson.D{{"$push", "$$ROOT"}}},
 	}}}
 
 	//project stage
 	projectStage := bson.D{
 		{
-			"$project",bson.D{
-				{"_id",0},
-				{"total_count",1},
-				{"data",bson.D{
-					{"$slice",[]interface{}{"$data",startIndex,recordPerPage}}}},
+			"$project", bson.D{
+				{"_id", 0},
+				{"total_count", 1},
+				{"data", bson.D{
+					{"$slice", []interface{}{"$data", startIndex, recordPerPage}}}},
 			},
 		},
 	}
 
-
-	switch(filter){
-
+	switch filter {
 
 	case string(util.Movie):
 		collectionName := util.GetCollectionNameByShoweType(string(util.Movie))
 		collection := GetCollectionByName(collectionName)
-		result,err := collection.Aggregate(ctx,mongo.Pipeline{
-			matchStage,groupStage,projectStage,
+		result, err := collection.Aggregate(ctx, mongo.Pipeline{
+			matchStage, groupStage, projectStage,
 		})
 
-		defer cancel();
+		defer cancel()
 
-		if err!=nil{
-			log.Fatal(err);
-			return nil,err;
+		if err != nil {
+			log.Fatal(err)
+			return nil, err
 		}
 
-		var allMovies []bson.M;
+		var allMovies []bson.M
 
-		if err=result.All(ctx,&allMovies);err!=nil{
-			log.Fatal(err);
-			return nil,err;
+		if err = result.All(ctx, &allMovies); err != nil {
+			log.Fatal(err)
+			return nil, err
 		}
 
-		return allMovies,nil;
+		return allMovies, nil
 
-		break;
+		break
 
 	case string(util.Event):
 		collectionName := util.GetCollectionNameByShoweType(string(util.Movie))
 		collection := GetCollectionByName(collectionName)
-		result,err := collection.Aggregate(ctx,mongo.Pipeline{
-			matchStage,groupStage,projectStage,
+		result, err := collection.Aggregate(ctx, mongo.Pipeline{
+			matchStage, groupStage, projectStage,
 		})
 
-		defer cancel();
+		defer cancel()
 
-		if err!=nil{
-			log.Fatal(err);
-			return nil,err;
+		if err != nil {
+			log.Fatal(err)
+			return nil, err
 		}
 
-		var allEvents []bson.M;
+		var allEvents []bson.M
 
-		if err=result.All(ctx,&allEvents);err!=nil{
-			log.Fatal(err);
-			return nil,err;
+		if err = result.All(ctx, &allEvents); err != nil {
+			log.Fatal(err)
+			return nil, err
 		}
 
-		return allEvents,nil;
-		break;
+		return allEvents, nil
+		break
 
 	case string(util.Activity):
 		collectionName := util.GetCollectionNameByShoweType(string(util.Movie))
 		collection := GetCollectionByName(collectionName)
-		result,err := collection.Aggregate(ctx,mongo.Pipeline{
-			matchStage,groupStage,projectStage,
+		result, err := collection.Aggregate(ctx, mongo.Pipeline{
+			matchStage, groupStage, projectStage,
 		})
 
-		defer cancel();
+		defer cancel()
 
-		if err!=nil{
-			log.Fatal(err);
-			return nil,err;
+		if err != nil {
+			log.Fatal(err)
+			return nil, err
 		}
 
-		var allActivities []bson.M;
+		var allActivities []bson.M
 
-		if err=result.All(ctx,&allActivities);err!=nil{
-			log.Fatal(err);
-			return nil,err;
+		if err = result.All(ctx, &allActivities); err != nil {
+			log.Fatal(err)
+			return nil, err
 		}
 
-		return allActivities,nil;
-		break;
+		return allActivities, nil
+		break
 
 	case string(util.LiveShow):
 		collectionName := util.GetCollectionNameByShoweType(string(util.Movie))
 		collection := GetCollectionByName(collectionName)
-		result,err := collection.Aggregate(ctx,mongo.Pipeline{
-			matchStage,groupStage,projectStage,
+		result, err := collection.Aggregate(ctx, mongo.Pipeline{
+			matchStage, groupStage, projectStage,
 		})
 
-		defer cancel();
+		defer cancel()
 
-		if err!=nil{
-			log.Fatal(err);
-			return nil,err;
+		if err != nil {
+			log.Fatal(err)
+			return nil, err
 		}
 
-		var allLiveShows []bson.M;
+		var allLiveShows []bson.M
 
-		if err=result.All(ctx,&allLiveShows);err!=nil{
-			log.Fatal(err);
-			return nil,err;
+		if err = result.All(ctx, &allLiveShows); err != nil {
+			log.Fatal(err)
+			return nil, err
 		}
 
-		return allLiveShows,nil;
-		break;
+		return allLiveShows, nil
+		break
 
 	}
 
-	return nil,fmt.Errorf("the movie type does not exist");
+	return nil, fmt.Errorf("the movie type does not exist")
 }
 
-func FetchAllMovieShowe(collectionName string,startIndex int,recordPerPage int)(interface{},error){
-	var allMovieList [] bson.M;
+func FetchAllMovieShowe(collectionName string, startIndex int, recordPerPage int) (interface{}, error) {
+	var allMovieList []bson.M
 
 	collection := GetCollectionByName(collectionName)
-	var ctx,cancel = context.WithTimeout(context.Background(),100*time.Second);
+	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
-	//defer cancel();	
+	//defer cancel();
 
-	matchStage := bson.D{{"$match",bson.D{{}}}}
+	matchStage := bson.D{{"$match", bson.D{{}}}}
 
-	groupStage := bson.D{{Key:"$group",
-		Value:bson.D{{Key:"_id",
-			Value: bson.D{{"_id","null"}}},
-		{Key: "total_count",Value: bson.D{{"$sum","1"}}},
-		{Key: "data",Value: bson.D{{"$push","$$ROOT"}}},
-		
-	}}}
+	groupStage := bson.D{{Key: "$group",
+		Value: bson.D{{Key: "_id",
+			Value: bson.D{{"_id", "null"}}},
+			{Key: "total_count", Value: bson.D{{"$sum", 1}}},
+			{Key: "data", Value: bson.D{{"$push", "$$ROOT"}}},
+		}}}
 
 	projectStage := bson.D{
 		{
-			"$project",bson.D{
-				{"_id",0},
-				{"total_count",1},
-				{"movie_showes",bson.D{
-					{"$slice",[]interface{}{"$data",startIndex,recordPerPage}},
+			"$project", bson.D{
+				{"_id", 0},
+				{"total_count", 1},
+				{"data", bson.D{
+					{"$slice", []interface{}{"$data", startIndex, recordPerPage}},
 				}},
 			},
 		},
 	}
 
-	result ,err := collection.Aggregate(ctx,mongo.Pipeline{
-		matchStage,groupStage,projectStage,
-	});
+	result, err := collection.Aggregate(ctx, mongo.Pipeline{
+		matchStage, groupStage, projectStage,
+	})
 
-	defer cancel();
+	defer cancel()
 
-	if err!=nil{
-		log.Println("Could not fetch movie items");
-		log.Fatal(err);
-		return nil,err;
+	if err != nil {
+		log.Println("Could not fetch movie items")
+		log.Fatal(err)
+		return nil, err
 	}
 
-	err = result.All(ctx,&allMovieList);
-	if err!=nil{
-		log.Println("Could not parse allmovie list!");
-		log.Fatal(err);
-		return nil,err;
+	err = result.All(ctx, &allMovieList)
+	if err != nil {
+		log.Println("Could not parse allmovie list!")
+		log.Fatal(err)
+		return nil, err
 	}
 
-	return allMovieList,nil;
+	return allMovieList[0], nil
+}
+
+func FetchAllActivityShowe(collectionName string, startIndex int, recordPerPage int) (interface{}, error) {
+	var allActivityList []bson.M
+
+	collection := GetCollectionByName(collectionName)
+	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+
+	//filter by activity
+	matchStage := bson.D{{"$match", bson.D{{}}}}
+
+	groupStage := bson.D{{"$group", bson.D{{"_id", bson.D{{"_id", "null"}}},
+		{"total_count", bson.D{{"$sum", 1}}},
+		{"data", bson.D{{"$push", "$$ROOT"}}},
+	}}}
+
+	projectStage := bson.D{
+		{
+			"$project", bson.D{
+				{"_id", 0},
+				{"total_count", 1},
+				{"data", bson.D{
+					{"$slice", []interface{}{"$data", startIndex, recordPerPage}},
+				}},
+			},
+		},
+	}
+
+	result, err := collection.Aggregate(ctx, mongo.Pipeline{
+		matchStage, groupStage, projectStage,
+	})
+	defer cancel()
+
+	if err != nil {
+		log.Println("could not fetch activity items")
+		log.Fatal(err)
+		return nil, err
+	}
+
+	err = result.All(ctx, &allActivityList)
+	if err != nil {
+		log.Println("could not parse all activity list")
+		log.Fatal(err)
+		return nil, err
+	}
+	log.Println("hi2")
+
+	return allActivityList, nil
+}
+
+func FetchAllEventShowe(collectionName string, startIndex int, recordPerPage int) (interface{}, error) {
+	var allEventList []bson.M
+
+	collection := GetCollectionByName(collectionName)
+	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+
+	//filter by activity
+	matchStage := bson.D{{"$match", bson.D{{}}}}
+	groupStage := bson.D{{"$group", bson.D{{"_id", bson.D{{"_id", "null"}}},
+		{"total_count", bson.D{{"$sum", 1}}},
+		{"data", bson.D{{"$push", "$$ROOT"}}},
+	}}}
+
+	projectStage := bson.D{
+		{
+			"$project", bson.D{
+				{"_id", 0},
+				{"total_count", 1},
+				{"data", bson.D{
+					{"$slice", []interface{}{"$data", startIndex, recordPerPage}},
+				}},
+			},
+		},
+	}
+
+	result, err := collection.Aggregate(ctx, mongo.Pipeline{
+		matchStage, groupStage, projectStage,
+	})
+	defer cancel()
+
+	if err != nil {
+		log.Println("could not fetch activity items")
+		log.Fatal(err)
+		return nil, err
+	}
+
+	err = result.All(ctx, &allEventList)
+	if err != nil {
+		log.Println("could not parse all activity list")
+		log.Fatal(err)
+		return nil, err
+	}
+
+	return allEventList, nil
+}
+
+func FetchAllLiveshows(collectionName string, startIndex int, recordPerPage int) (interface{}, error) {
+	var allLiveshowList []bson.M
+
+	collection := GetCollectionByName(collectionName)
+	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+
+	//filter by activity
+	matchStage := bson.D{{"$match", bson.D{{}}}}
+	groupStage := bson.D{{"$group", bson.D{{"_id", bson.D{{"_id", "null"}}},
+		{"total_count", bson.D{{"$sum", 1}}},
+		{"data", bson.D{{"$push", "$$ROOT"}}},
+	}}}
+
+	projectStage := bson.D{
+		{
+			"$project", bson.D{
+				{"_id", 0},
+				{"total_count", 1},
+				{"data", bson.D{
+					{"$slice", []interface{}{"$data", startIndex, recordPerPage}},
+				}},
+			},
+		},
+	}
+
+	result, err := collection.Aggregate(ctx, mongo.Pipeline{
+		matchStage, groupStage, projectStage,
+	})
+	defer cancel()
+
+	if err != nil {
+		log.Println("could not fetch activity items")
+		log.Fatal(err)
+		return nil, err
+	}
+
+	err = result.All(ctx, &allLiveshowList)
+	if err != nil {
+		log.Println("could not parse all activity list")
+		log.Fatal(err)
+		return nil, err
+	}
+
+	return allLiveshowList, nil
 }
