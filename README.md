@@ -1,16 +1,14 @@
 # Event-Topia
-This is a web application that helps to have online bookings from your comfort zone . A project under development which is inspired from BOOK-MY-SHOW.
+This is a backend application that helps to have online bookings from your comfort zone . A project under development which is inspired from BOOK-MY-SHOW.
 
 ## Technologies
-- React JS
-- Tailwind CSS
 - Golang
 - MongoDB
 
 ## Design patterns
-- Singelton
-- Factory Method
+- Singelton used in MongoDB instance and GRID File system of MongoDB
+- Factory Method used to implement booking for movies,live-show,event,activity type shows.
 
-# Async Concepts
+# Async Concepts used
 - goroutines
 - channels
