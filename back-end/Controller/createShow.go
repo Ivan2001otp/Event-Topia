@@ -94,7 +94,7 @@ func CreateMovieController(w http.ResponseWriter, r *http.Request) {
 	}
 
 	movie.ID = primitive.NewObjectID()
-	movie.Movie_id = movie.ID.Hex()
+	movie.Showe_id = movie.ID.Hex()
 
 	movie.ShowName = r.FormValue(Util.SHOW_NAME)
 
@@ -345,7 +345,7 @@ func CreateLiveshowController(w http.ResponseWriter, r *http.Request) {
 	}
 
 	liveShow.ID = primitive.NewObjectID()
-	liveShow.Liveshow_id = liveShow.ID.Hex()
+	liveShow.Showe_id = liveShow.ID.Hex()
 
 	liveShow.ShowName = r.FormValue(Util.SHOW_NAME)
 	duration, _ := strconv.ParseInt(r.FormValue(Util.SHOW_DURATION), 10, 64)
@@ -357,7 +357,7 @@ func CreateLiveshowController(w http.ResponseWriter, r *http.Request) {
 
 	liveShow.ShowGenre = r.FormValue(Util.SHOW_GENRE)
 	// liveShow.ShowReleaseDate = r.FormValue(Util.SHOW_RELEASE_DATE);
-	liveShow.VendorName = r.FormValue(Util.VENDOR_NAME)
+	liveShow.Vendor_name = r.FormValue(Util.VENDOR_NAME)
 
 	liveShow.ShowStartTime = r.FormValue(Util.SHOW_START_TIME)
 	liveShow.ShowEndTime = r.FormValue(Util.SHOW_END_TIME)
@@ -455,7 +455,7 @@ func CreateActivityController(w http.ResponseWriter, r *http.Request) {
 	}
 
 	activity.ID = primitive.NewObjectID()
-	activity.Activity_id = activity.ID.Hex()
+	activity.Showe_id = activity.ID.Hex()
 
 	activity.ShowName = r.FormValue(Util.SHOW_NAME)
 	duration, _ := strconv.ParseInt(r.FormValue(Util.SHOW_DURATION), 10, 64)
@@ -563,7 +563,7 @@ func CreateEventController(w http.ResponseWriter, r *http.Request) {
 	}
 
 	event.ID = primitive.NewObjectID()
-	event.Event_show_id = event.ID.Hex()
+	event.Showe_id = event.ID.Hex()
 
 	event.ShowName = r.FormValue(Util.SHOW_NAME)
 	duration, _ := strconv.ParseInt(r.FormValue(Util.SHOW_DURATION), 10, 64)
@@ -600,3 +600,4 @@ func CreateEventController(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(status{"message": "success", "id": result})
 }
+

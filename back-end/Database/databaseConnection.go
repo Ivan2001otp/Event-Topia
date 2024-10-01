@@ -1,6 +1,7 @@
 package database
 
 import (
+	model "Backend/Model"
 	showe "Backend/Model/Showe"
 	util "Backend/Util"
 	"context"
@@ -496,6 +497,24 @@ func FetchShoweByFilter(collectionName string, startIndex int, recordPerPage int
 	return nil, fmt.Errorf("the movie type does not exist")
 }
 
+func CreateBookingByshowId(showeType string,
+		registeredShoweId string,
+		seat_number string,
+		modelBooking *model.BookingModel)(interface{},error){
+	
+	var ctx,cancel = context.WithTimeout(context.Background(),100*time.Second);
+	collection := GetCollectionByName(util.GetCollectionNameByShoweType(showeType));
+
+	result,err := collection.InsertOne(ctx,modelBooking);
+	defer cancel();
+
+	if err!=nil{
+		return nil,err;
+	}
+
+	return result,nil;
+}
+
 func FetchAllMovieShowe(collectionName string, startIndex int, recordPerPage int) (interface{}, error) {
 	var allMovieList []bson.M
 
@@ -686,3 +705,4 @@ func FetchAllLiveshows(collectionName string, startIndex int, recordPerPage int)
 
 	return allLiveshowList, nil
 }
+
